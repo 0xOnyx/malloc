@@ -18,7 +18,7 @@ LIBS=
 _DEPS = malloc.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = strlen.o
+_OBJ = malloc.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: $(NAME) $(LINK_NAME)

@@ -1,9 +1,12 @@
-//
-// Created by Jeremy on 12.02.2024.
-//
-
 #ifndef MALLOC_MALLOC_H
-#define MALLOC_MALLOC_H
+# define MALLOC_MALLOC_H
+# include <stdlib.h>
+# include <unistd.h>
+# include <sys/mman.h>
+# include <sys/types.h>
+# include <sys/time.h>
+# include <sys/resource.h>
+# include <stdbool.h>
 
 
 void	*malloc(size_t size);
