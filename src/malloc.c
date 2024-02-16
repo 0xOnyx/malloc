@@ -83,9 +83,8 @@ void *manage_memory(enum memory_manage option, size_t size){
 
 }
 
-void set_memory(size_t size, void *addr){ //todo
+void set_memory(size_t size, void *addr, void *endBlock){ //todo
 	size_t old_free_size;
-	void *end;
 
 	old_free_size = BLOCK_LEN(addr);
 	BLOCK_LEN(addr) = size;
@@ -93,20 +92,19 @@ void set_memory(size_t size, void *addr){ //todo
 	if (old_free_size - size)
 		BLOCK_END(addr, old_free_size) = old_free_size - size - 3 * BOOKUNIT;
 	BLOCK_VACANT(addr) = USED;
+	if (&BLOCK_END(addr, size) + BOOKUNIT < endBlock)
+		BLOCK_END(addr, size) = FREE;
 
-
-	void *endBlock = addr + get_page_size(size);
-	if (&BLOCK_END(addr, size) )
 }
 
-void *free_zone_in(size_t size, enum memory_plage index){
+void *free_zone_in(size_t size, enum memory_plage index, void **endBlock){
 	void **tab;
 
 	tab = g_memory[index];
 	while(tab != NULL && !(*tab)){
 		void *block = *tab;
-		void *endBlock = block + get_page_size(size);
-		while(block < endBlock){
+		*endBlock = block + get_page_size(size);
+		while(block < *endBlock){
 			size_t current_size = BLOCK_LEN(block);
 			if (BLOCK_VACANT(block) == FREE && current_size >= size)
 				return block;
@@ -114,18 +112,20 @@ void *free_zone_in(size_t size, enum memory_plage index){
 		}
 		tab++;
 	}
+	*endBlock = NULL;
 	return NULL;
 }
 
 
 void *get_memory(size_t size, enum memory_plage index){
 	void *addr;
+	void *endBlock;
 
-	if (index == LARGE || (addr = free_zone_in(size, index)) != NULL){
+	if (index == LARGE || (addr = free_zone_in(size, index, &endBlock) != NULL){
 		g_memory[index] = manage_memory(CREATE, get_page_size(size));
 		addr = g_memory[index];
 	}
-	set_memory(size, addr);
+	set_memory(size, addr, endBlock);
 }
 
 void	*malloc(size_t size){
