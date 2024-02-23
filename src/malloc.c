@@ -12,26 +12,34 @@ enum vacant {
 	USED,
 };
 
+#define HEADER sizeof(t_list)
+
 #define BOOKUNIT sizeof(size_t)
-#define BOOKKEEPING 3 * BOOKUNIT
+#define BOOKKEEPING (size_t)(3 * BOOKUNIT)
 
-#define PAGE_SIZE getpagesize()
+#define PAGE_SIZE (size_t)getpagesize()
 
-#define TINY_SIZE TINY_PAGE / 100
-#define TINY_PAGE 4 * PAGE_SIZE
+#define TINY_SIZE (size_t)(TINY_PAGE / 100)
+#define TINY_PAGE (size_t)(4 * PAGE_SIZE)
 
-#define SMALL_SIZE SMALL_PAGE / 100
-#define SMALL_PAGE 40 * PAGE_SIZE
+#define SMALL_SIZE (size_t)(SMALL_PAGE / 100)
+#define SMALL_PAGE (size_t)(40 * PAGE_SIZE)
+
+#define ALIGN_PAGE(size) size % PAGE_SIZE ? (size / PAGE_SIZE + 1) * PAGE_SIZE : size
 
 #define get_index_memory(size) (size <= TINY_SIZE ? TINY : size <= SMALL_SIZE ? SMALL : LARGE)
-#define get_page_size(size) (size <= TINY_SIZE ? TINY_PAGE : size <= SMALL_SIZE ? SMALL_PAGE : size + BOOKKEEPING)
+#define get_page_size(size) (size <= TINY_SIZE ? TINY_PAGE : size <= SMALL_SIZE ? SMALL_PAGE : ALIGN_PAGE(size + BOOKKEEPING + HEADER))
 
 #define BLOCK_LEN(addr) *((size_t *)addr)
 #define BLOCK_VACANT(addr) *(((size_t *)addr) + 1)
 #define BLOCK_END(addr, size) *(size_t *)(addr + size + 2 * BOOKUNIT)
 
-void **g_memory[3];
+typedef struct s_list {
+	size_t				size;
+	struct s_list		*next;
+} t_list;
 
+t_list *g_memory[3];
 
 bool can_alloc(size_t current_memory, size_t add_size){
 	static rlim_t _sof_limit;
@@ -49,18 +57,10 @@ bool can_alloc(size_t current_memory, size_t add_size){
 	return true;
 }
 
-void *create_memory(size_t size){
-	void *addr = mmap(NULL,
-	size, PROT_READ | PROT_WRITE,
-	MAP_PRIVATE | MAP_ANONYMOUS,
-	-1, 0);
-	if (addr != NULL)
-	{
-		BLOCK_LEN(addr) = size - BOOKKEEPING;
-		BLOCK_VACANT(addr) = FREE;
-		*(size_t *)(addr + size - BOOKUNIT) = size - BOOKKEEPING;
-	}
-	return addr;
+void init_bookkeeping(void *addr, size_t size){
+	BLOCK_LEN(addr) = size - BOOKKEEPING;
+	BLOCK_VACANT(addr) = FREE;
+	*(size_t *)(addr + size - BOOKUNIT) = size - BOOKKEEPING;
 }
 
 enum memory_manage {
@@ -74,58 +74,63 @@ void *manage_memory(enum memory_manage option, size_t size){
 
 	if (option == CREATE && can_alloc(cur_memory, size)) {
 		cur_memory += size;
-		return create_memory(size);
+		return mmap(NULL,
+		size, PROT_READ | PROT_WRITE,
+		MAP_PRIVATE | MAP_ANONYMOUS,
+		-1, 0);
 	}
-	if (option == DELETE){
-		cur_memory -= free_memory(size);
-		return NULL;
-	}
-
+//	if (option == DELETE){
+//		cur_memory -= free_memory(size);
+//		return NULL;
+//	}
+	return NULL;
 }
 
-void set_memory(size_t size, void *addr, void *endBlock){ //todo
+void set_memory(size_t size, void *addr){
 	size_t old_free_size;
 
 	old_free_size = BLOCK_LEN(addr);
 	BLOCK_LEN(addr) = size;
+	BLOCK_VACANT(addr) = USED;
 	BLOCK_END(addr, size) = size;
 	if (old_free_size - size)
+	{
+		BLOCK_LEN(addr + size + BOOKKEEPING) = old_free_size - size - 3 * BOOKUNIT;
+		if (BLOCK_VACANT(addr + size + BOOKKEEPING) != USED)
+			BLOCK_VACANT(addr + size + BOOKKEEPING) = FREE;
 		BLOCK_END(addr, old_free_size) = old_free_size - size - 3 * BOOKUNIT;
-	BLOCK_VACANT(addr) = USED;
-	if (&BLOCK_END(addr, size) + BOOKUNIT < endBlock)
-		BLOCK_END(addr, size) = FREE;
-
+	}
 }
 
-void *free_zone_in(size_t size, enum memory_plage index, void **endBlock){
-	void **tab;
+void *free_zone_in(size_t size, enum memory_plage index){
+	t_list *list;
 
-	tab = g_memory[index];
-	while(tab != NULL && !(*tab)){
-		void *block = *tab;
-		*endBlock = block + get_page_size(size);
-		while(block < *endBlock){
+	list = g_memory[index];
+	while(list != NULL){
+		void *block = list + HEADER;
+		void *end = block + list->size;
+		while(block < end){
 			size_t current_size = BLOCK_LEN(block);
 			if (BLOCK_VACANT(block) == FREE && current_size >= size)
 				return block;
 			block += current_size + BOOKUNIT * 2;
 		}
-		tab++;
+		list = list->next;
 	}
-	*endBlock = NULL;
 	return NULL;
 }
 
-
 void *get_memory(size_t size, enum memory_plage index){
 	void *addr;
-	void *endBlock;
 
-	if (index == LARGE || (addr = free_zone_in(size, index, &endBlock) != NULL){
-		g_memory[index] = manage_memory(CREATE, get_page_size(size));
-		addr = g_memory[index];
+	if (index == LARGE || (addr = free_zone_in(size, index)) != NULL){
+		t_list *new = manage_memory(CREATE, get_page_size(size));
+		new->size = get_page_size(size) - HEADER;
+		addr = ((void *)new) + HEADER;
+		init_bookkeeping(addr, new->size);
 	}
-	set_memory(size, addr, endBlock);
+	set_memory(size, addr);
+	return addr;
 }
 
 void	*malloc(size_t size){
@@ -147,13 +152,15 @@ void	*malloc(size_t size){
 
 
 void	free(void *ptr){
-	manage_memory()// and more
+	(void)ptr;
 }
+
+#include <string.h> //todo modify with ft
 void	*calloc(size_t nmemb, size_t size){
 	void *ptr;
 	ptr = malloc(nmemb * size);
 	if (ptr)
-		ft_bzero(ptr, nmemb * size);
+		bzero(ptr, nmemb * size);
 	return (ptr);
 }
 
@@ -161,7 +168,7 @@ void	*realloc(void *ptr, size_t size) {
 	void *new_ptr;
 	new_ptr = malloc(size);
 	if (new_ptr) {
-		ft_memcpy(new_ptr, ptr, size);
+		memcpy(new_ptr, ptr, size);
 		free(ptr);
 	}
 	return (new_ptr);
