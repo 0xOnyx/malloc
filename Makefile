@@ -41,5 +41,8 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all fclean clean re
+test:
+	gcc $(CFLAGS) src/malloc.c
+
+.PHONY: all fclean clean re test
 
