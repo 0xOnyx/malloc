@@ -79,6 +79,7 @@ void *manage_memory(enum memory_manage option, size_t size){
 		MAP_PRIVATE | MAP_ANONYMOUS,
 		-1, 0);
 	}
+	//todo ft_free and realloc implementation
 //	if (option == DELETE){
 //		cur_memory -= free_memory(size);
 //		return NULL;
