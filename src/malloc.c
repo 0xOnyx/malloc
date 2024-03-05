@@ -213,21 +213,21 @@ void	ft_free(void *ptr) {
 }
 
 #include <strings.h> //todo modify with ft
-void	*calloc(size_t nmemb, size_t size){
+void	*ft_calloc(size_t nmemb, size_t size){
 	void *ptr;
-	ptr = malloc(nmemb * size);
+	ptr = ft_malloc(nmemb * size);
 	if (ptr)
 		bzero(ptr, nmemb * size);
 	return (ptr);
 }
 
 #include <string.h> //todo modify with ft
-void	*realloc(void *ptr, size_t size) {
+void	*ft_realloc(void *ptr, size_t size) {
 	void *new_ptr;
-	new_ptr = malloc(size);
+	new_ptr = ft_malloc(size);
 	if (new_ptr) {
-		memcpy(new_ptr, ptr, size);
-		free(ptr);
+		memcpy(new_ptr, ptr, BLOCK_LEN(ptr - 2 * BOOKUNIT));
+		ft_free(ptr);
 	}
 	return (new_ptr);
 }
@@ -268,31 +268,42 @@ void print_memory(){
 	print_block(LARGE);
 }
 
-
+#define M (1024 * 1024)
 int	main()
 {
-	size_t size_tiny = TINY_SIZE - 1;
-	size_t size_small = SMALL_SIZE - 1;
-	size_t size_large = getpagesize() - 130;
+//	size_t size_tiny = TINY_SIZE - 1;
+//	size_t size_small = SMALL_SIZE - 1;
+//	size_t size_large = getpagesize() - 130;
+//
+//	void *tinyblock = ft_malloc(size_tiny);
+//
+//	void *block[100];
+//	for (int i = 0; i < 100; i++){
+//		block[i] = ft_malloc(size_small);
+//	}
+//	void *megablock[4];
+//	for (int i = 0; i < 4; i++){
+//		megablock[i] = ft_malloc(size_large);
+//	}
+//	print_memory();
+//
+//	ft_free(tinyblock);
+//	for (int i = 0; i < 100; i++) {
+//		ft_free(block[i]);
+//	}
+//	ft_free(megablock[2]);
+//	print_memory();
+	char *addr1;
+	char *addr3;
 
-	void *tinyblock = ft_malloc(size_tiny);
-
-	void *block[100];
-	for (int i = 0; i < 100; i++){
-		block[i] = ft_malloc(size_small);
-	}
-	void *megablock[4];
-	for (int i = 0; i < 4; i++){
-		megablock[i] = ft_malloc(size_large);
-	}
+	addr1 = (char *)ft_malloc(16 * M);
+	bzero(addr1, 16 * M);
+	strcpy(addr1, "Bonjours\n");
+	printf("%s", addr1);
 	print_memory();
-
-	ft_free(tinyblock);
-	for (int i = 0; i < 100; i++) {
-		ft_free(block[i]);
-	}
-	ft_free(megablock[2]);
+	addr3 = (char *) ft_realloc(addr1, 128*M);
+	addr3[127*M] = 42;
+	printf("%s", addr3);
 	print_memory();
-
 	return 0;
 };
