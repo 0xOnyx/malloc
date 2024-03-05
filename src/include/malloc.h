@@ -7,6 +7,7 @@
 # include <sys/time.h>
 # include <sys/resource.h>
 # include <stdbool.h>
+#include <stdio.h>
 
 
 void	*malloc(size_t size);
