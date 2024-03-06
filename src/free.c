@@ -17,6 +17,38 @@ t_list	*getList(void *ptr, enum memory_plage *index) {
 	return NULL;
 }
 
+void    removeList(t_list *list, enum memory_plage index)
+{
+	t_list *tmp = g_memory[index];
+	t_list *prev = NULL;
+
+	while(tmp)
+	{
+		if (tmp == list)
+		{
+			if (prev)
+				prev->next = tmp->next;
+			else
+				g_memory[index] = tmp->next;
+			break ;
+		}
+		prev = tmp;
+		tmp = tmp->next;
+	}
+}
+
+void	adjustInfo(void **addr1, void **addr2, bool option)
+{
+	if ((option && BLOCK_VACANT(*addr1) == FREE) \
+	|| (!option && BLOCK_VACANT(*addr2) == FREE)) {
+		size_t size = BLOCK_LEN(*addr1) + BLOCK_LEN(*addr2) + BOOKKEEPING;
+		BLOCK_LEN(*addr1) = size;
+		BLOCK_END(*addr1, size) = size;
+		if (option)
+			*addr2 = *addr1;
+	}
+}
+
 void	ft_free(void *ptr) {
 	t_list *list;
 	enum memory_plage index;
@@ -28,33 +60,25 @@ void	ft_free(void *ptr) {
 		dprintf(2, "malloc: *** error for object %p: pointer being freed was not allocated\n", ptr);
 		dprintf(2, "malloc: *** set a breakpoint in malloc_error_break to debug\n");
 		return;
+		//abort();
 	}
 	void *addr = ptr - 2 * BOOKUNIT;
-	void *addrPrev = NULL;
 	BLOCK_VACANT(addr) = FREE;
 
+	// check if previous slot is also empty
 	if (addr - BOOKUNIT > (void *) list + HEADER) {
-		addrPrev = addr - BLOCK_LEN(addr - BOOKUNIT) - BOOKKEEPING;
-		if (BLOCK_VACANT(addrPrev) == FREE) {
-			size_t size = BLOCK_LEN(addrPrev) + BLOCK_LEN(addr) + BOOKKEEPING;
-			BLOCK_LEN(addrPrev) = size;
-			BLOCK_END(addrPrev, size) = size;
-			addr = addrPrev;
-		}
+		void *addrPrev = addr - BLOCK_LEN(addr - BOOKUNIT) - BOOKKEEPING;
+		adjustInfo(&addrPrev, &addr, true);
 	}
+
+	//check if next slot is also empty
 	void *addrNext = addr + BLOCK_LEN(addr) + BOOKKEEPING;
 	if (addrNext < (void *) list + HEADER + list->size) {
-		if (BLOCK_VACANT(addrNext) == FREE) {
-			size_t finalSize = BLOCK_LEN(addr) + BLOCK_LEN(addrNext) + BOOKKEEPING;
-			BLOCK_LEN(addr) = finalSize;
-			BLOCK_END(addr, finalSize) = finalSize;
-		}
+		adjustInfo(&addr, &addrNext, false);
 	}
+
+	//remove the page if full free
 	if (BLOCK_LEN((void *) list + HEADER) + BOOKKEEPING == list->size) {
-		t_list **prevList = &g_memory[index];
-		while (*prevList && (*prevList)->next != list && (*prevList)->next != NULL)
-			*prevList = (*prevList)->next;
-		*prevList = list->next; //todo: comprendre why *prevList et non (*prevList)->next
-		munmap((void *) list, list->size);
+		removeList(list, index);
 	}
 }

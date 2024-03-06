@@ -5,6 +5,7 @@ void print_block( enum memory_plage index){
 	t_list *list;
 
 	list = g_memory[index];
+	printf("test => %p\n", list);
 	while(list != NULL){
 		void *block = (void *)list + HEADER;
 		void *end = block + list->size;

@@ -8,16 +8,40 @@ typedef struct lst {
 	struct lst *next;
 } lst;
 
-void test(lst *ptr, lst *list)
+lst *org;
+
+void test(lst *list)
 {
-	lst **prevList = &ptr;
-	while (*prevList && (*prevList)->next != list && (*prevList)->next != NULL)
-		*prevList = (*prevList)->next;
-	printf("test1 => %s %p && %s %p\n", (*prevList)->str, (*prevList)->next, list->str, list->next);
-	(*prevList)->next = list->next;
+	lst *tmp = org;
+	while (org && org != list && org->next != list && org->next != NULL)
+		org = org->next;
+	org->next = list->next;
+	printf("test => %s %p & %s %p\n", org->str, org->next, list->str, list->next);
+	free(list->str);
+	free(list);
+	org = tmp;
 }
 
-lst *org;
+void    removeNode(lst *list)
+{
+	lst *tmp = org;
+	lst *prev = NULL;
+
+	while(tmp)
+	{
+		if (tmp == list)
+		{
+			if (prev)
+				prev->next = tmp->next;
+			else
+				org = tmp->next;
+			break ;
+		}
+		prev = tmp;
+		tmp = tmp->next;
+	}
+}
+
 
 int main() {
 //	char *s = "Hello, World!";
@@ -32,14 +56,14 @@ int main() {
 	org->str = calloc(2, 1);
 	org->str[0] = 'a';
 	lst *tmp = org;
-	lst *tmp2 = NULL;
+	lst *tmp2 = org;
 	for (int i = 0; i < 15; i++)
 	{
 		lst *new = calloc(1, sizeof(lst));
 		new->str = calloc(2, 1);
 		new->str[0] = 'b' + (char) i;
-		if (i == 5)
-			tmp2 = new;
+//		if (i == 5)
+//			tmp2 = new;
 		tmp->next = new;
 		tmp = tmp->next;
 	}
@@ -50,7 +74,8 @@ int main() {
 		tmp = tmp->next;
 	}
 	printf("\n");
-	test(org, tmp2);
+	removeNode(tmp2);
+//	test(tmp2);
 //	lst **prevList = &org;
 //	while (*prevList && (*prevList)->next != tmp2 && (*prevList)->next != NULL)
 //		*prevList = (*prevList)->next;
