@@ -41,8 +41,10 @@ fclean: clean
 
 re: fclean all
 
+
+SRCS = src/malloc.c src/calloc.c src/free.c src/print.c src/realloc.c
 test:
-	gcc $(CFLAGS) src/malloc.c
+	gcc $(CFLAGS) $(SRCS)
 
 .PHONY: all fclean clean re test
 
