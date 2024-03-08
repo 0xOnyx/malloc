@@ -16,7 +16,7 @@ void test(lst *list)
 	while (org && org != list && org->next != list && org->next != NULL)
 		org = org->next;
 	org->next = list->next;
-	printf("test => %s %p & %s %p\n", org->str, org->next, list->str, list->next);
+	ft_printf("test => %s %p & %s %p\n", org->str, org->next, list->str, list->next);
 	free(list->str);
 	free(list);
 	org = tmp;
@@ -47,8 +47,8 @@ int main() {
 //	char *s = "Hello, World!";
 //	void *test = (void *)s;
 //	char *s1 = test + 2;
-//	printf("strlen(\"%s\") = %lu\n", s, strlen(s));
-//	printf("s1: %s\n", s1);
+//	ft_printf("strlen(\"%s\") = %lu\n", s, strlen(s));
+//	ft_printf("s1: %s\n", s1);
 //	char *ptr = malloc(16 *sizeof(char));
 //	free((void *) ptr+5);
 //	abort();
@@ -70,22 +70,22 @@ int main() {
 	tmp = org;
 	while (tmp)
 	{
-		printf("test1 => %s %p\n", tmp->str, tmp->next);
+		ft_printf("test1 => %s %p\n", tmp->str, tmp->next);
 		tmp = tmp->next;
 	}
-	printf("\n");
+	ft_printf("\n");
 	removeNode(tmp2);
 //	test(tmp2);
 //	lst **prevList = &org;
 //	while (*prevList && (*prevList)->next != tmp2 && (*prevList)->next != NULL)
 //		*prevList = (*prevList)->next;
-//	printf("test1 => %s %p && %s %p\n", (*prevList)->str, (*prevList)->next, tmp2->str, tmp2->next);
+//	ft_printf("test1 => %s %p && %s %p\n", (*prevList)->str, (*prevList)->next, tmp2->str, tmp2->next);
 //	(*prevList)->next = tmp2->next;
-	printf("\n");
+	ft_printf("\n");
 	tmp = org;
 	while (tmp)
 	{
-		printf("test2 => %s %p\n", tmp->str, tmp->next);
+		ft_printf("test2 => %s %p\n", tmp->str, tmp->next);
 		tmp = tmp->next;
 	}
 	return 0;

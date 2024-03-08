@@ -8,7 +8,7 @@ endif
 
 IDIR = src/include
 CC=gcc
-CFLAGS=-I$(IDIR) -Wall -Wextra -Werror -g  -fpic -fPIC
+CFLAGS=-I$(IDIR) -Wall -Wextra -Werror -fpic -fPIC
 
 ODIR=obj
 SDIR=src
@@ -18,7 +18,7 @@ LIBS=
 _DEPS = malloc.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = malloc.o calloc.o free.o print.o realloc.o
+_OBJ = malloc.o calloc.o free.o print.o realloc.o utils.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: $(NAME) $(LINK_NAME)

@@ -92,4 +92,20 @@ void	show_alloc_mem();
 
 void manage_memory(enum memory_manage option, size_t size, void **addr);
 
+
+///utils
+void	ft_bzero(void *s, size_t n);
+void	*ft_memcpy(void *dest, const void *src, size_t n);
+
+# include <stdarg.h>
+# include <unistd.h>
+
+int	ft_printf(const char *format, ...);
+int	ft_putchar(int c);
+int	ft_putstr(char *str);
+int	ft_puthex(int option, unsigned long long nbr);
+int	ft_putptr(unsigned long long ptr);
+int	ft_putnbr(int nbr);
+int	ft_putnbr_unsigned(unsigned int nbr);
+
 #endif //MALLOC_MALLOC_H

@@ -32,15 +32,15 @@ int	main()
 //	addr1 = (char *)malloc(16 * M);
 //	bzero(addr1, 16 * M);
 //	strcpy(addr1, "Bonjours\n");
-//	printf("%s", addr1);
+//	ft_printf("%s", addr1);
 //	//print_memory();
 //	show_alloc_mem();
 //	addr3 = (char *) realloc(addr1, 128*M);
 //	addr3[127*M] = 42;
-//	printf("%s", addr3);
+//	ft_printf("%s", addr3);
 	//print_memory();
 	show_alloc_mem();
-	malloc(5);
+	malloc(10000000450003);
 	show_alloc_mem();
 	return 0;
 };
