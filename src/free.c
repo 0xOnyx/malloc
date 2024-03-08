@@ -1,6 +1,6 @@
 #include "malloc.h"
 
-t_list	*getList(void *ptr, enum memory_plage *index) {
+static t_list	*getList(void *ptr, enum memory_plage *index) {
 	t_list *list;
 
 	for (*index = TINY; *index < NONE; (*index)++)
@@ -17,7 +17,7 @@ t_list	*getList(void *ptr, enum memory_plage *index) {
 	return NULL;
 }
 
-void    removeList(t_list *list, enum memory_plage index)
+static void    removeList(t_list *list, enum memory_plage index)
 {
 	t_list *tmp = g_memory[index];
 	t_list *prev = NULL;
@@ -37,7 +37,7 @@ void    removeList(t_list *list, enum memory_plage index)
 	}
 }
 
-void	adjustInfo(void **addr1, void **addr2, bool option)
+static void	adjustInfo(void **addr1, void **addr2, bool option)
 {
 	if ((option && BLOCK_VACANT(*addr1) == FREE) \
 	|| (!option && BLOCK_VACANT(*addr2) == FREE)) {
@@ -49,7 +49,7 @@ void	adjustInfo(void **addr1, void **addr2, bool option)
 	}
 }
 
-void	ft_free(void *ptr) {
+void	free(void *ptr) {
 	t_list *list;
 	enum memory_plage index;
 

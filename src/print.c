@@ -1,11 +1,10 @@
 #include "malloc.h"
 
-void print_block( enum memory_plage index){
+static void print_block( enum memory_plage index){
 	int nbr;
 	t_list *list;
 
 	list = g_memory[index];
-	printf("test => %p\n", list);
 	while(list != NULL){
 		void *block = (void *)list + HEADER;
 		void *end = block + list->size;
@@ -33,4 +32,34 @@ void print_memory(){
 	print_block(SMALL);
 	printf("[plage data for LARGE]\n");
 	print_block(LARGE);
+}
+
+static void show_all_block( enum memory_plage index, char *str){
+	int nbr;
+	t_list *list;
+
+	list = g_memory[index];
+	while(list != NULL){
+		void *block = (void *)list + HEADER;
+		void *end = block + list->size;
+		printf("%s : %p\n", str, list);
+		nbr = 1;
+		while(block < end){
+			size_t current_size = BLOCK_LEN(block);
+			size_t use = BLOCK_VACANT(block);
+			if (use == USED)
+				printf("%p - %p : %lu bytes\n", block, block + current_size, current_size);
+			block += current_size + BOOKKEEPING;
+			nbr++;
+		}
+		if (index!= LARGE)
+			printf("\n\n");
+		list = list->next;
+	}
+}
+
+void show_alloc_mem() {
+	show_all_block(TINY, "TINY");
+	show_all_block(SMALL, "SMALL");
+	show_all_block(LARGE, "LARGE");
 }

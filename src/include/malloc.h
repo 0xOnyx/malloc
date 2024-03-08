@@ -3,7 +3,6 @@
 
 # include <stdbool.h>
 # include <stdio.h>
-# include <stdlib.h>
 # include <sys/mman.h>
 # include <sys/resource.h>
 # include <sys/time.h>
@@ -68,25 +67,28 @@ t_list *g_memory[3];
 /// \brief pending on the size paramater, either use a slot within a memory page or create a new one
 /// \param size memory dynamically allocated length
 /// \return  memory dynamically allocated address
-void	*ft_malloc(size_t size);
+void	*malloc(size_t size);
 
 /// \brief set the memory pointed by ptr as free, and if necessary, free the page containing ptr.
 /// \param ptr the memory to be freed
-void	ft_free(void *ptr);
+void	free(void *ptr);
 
 /// \brief like a malloc, but sets nmemb * size byte to 0
 /// \param nmemb memory dynamically allocated type size
 /// \param size memory dynamically allocated length
 /// \return memory dynamically allocated address
-void	*ft_calloc(size_t nmemb, size_t size);
+void	*calloc(size_t nmemb, size_t size);
 
 /// \brief free memory pointed by ptr and creates an new one of length define by size
 /// \param ptr the memory to be reallocated
 /// \param size memory dynamically reallocated length
 /// \return memory dynamically reallocated address
-void	*ft_realloc(void *ptr, size_t size);
+void	*realloc(void *ptr, size_t size);
 
 /// \brief print all the pages content
-void print_memory();
+void	print_memory();
+
+/// \brief print all the pages content as requested from the subject
+void	show_alloc_mem();
 
 #endif //MALLOC_MALLOC_H

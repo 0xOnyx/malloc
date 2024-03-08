@@ -1,6 +1,6 @@
 #include "malloc.h"
 
-bool can_alloc(size_t current_memory, size_t add_size){
+static bool can_alloc(size_t current_memory, size_t add_size){
 	static rlim_t _sof_limit;
 	struct rlimit limit;
 
@@ -15,13 +15,13 @@ bool can_alloc(size_t current_memory, size_t add_size){
 	return true;
 }
 
-void init_bookkeeping(void *addr, size_t size){
+static void init_bookkeeping(void *addr, size_t size){
 	BLOCK_LEN(addr) = size - BOOKKEEPING;
 	BLOCK_VACANT(addr) = FREE;
 	*(size_t *)(addr + size - BOOKUNIT) = size - BOOKKEEPING;
 }
 
-void *manage_memory(enum memory_manage option, size_t size){
+static void *manage_memory(enum memory_manage option, size_t size){
 	static unsigned long long cur_memory;
 
 	if (option == CREATE && can_alloc(cur_memory, size)) {
@@ -31,7 +31,7 @@ void *manage_memory(enum memory_manage option, size_t size){
 		MAP_PRIVATE | MAP_ANONYMOUS,
 		-1, 0);
 	}
-	//todo ft_free and realloc implementation
+	//todo free and realloc implementation
 //	if (option == DELETE){
 //		cur_memory -= free_memory(size);
 //		return NULL;
@@ -39,7 +39,7 @@ void *manage_memory(enum memory_manage option, size_t size){
 	return NULL;
 }
 
-void set_memory(size_t size, void *addr){
+static void set_memory(size_t size, void *addr){
 	size_t old_free_size;
 
 	old_free_size = BLOCK_LEN(addr);
@@ -55,7 +55,7 @@ void set_memory(size_t size, void *addr){
 	}
 }
 
-void *free_zone_in(size_t size, enum memory_plage index){
+static void *free_zone_in(size_t size, enum memory_plage index){
 	t_list *list;
 
 	list = g_memory[index];
@@ -73,7 +73,7 @@ void *free_zone_in(size_t size, enum memory_plage index){
 	return NULL;
 }
 
-void	append_memory_to_global(enum memory_plage index, t_list *new) {
+static void	append_memory_to_global(enum memory_plage index, t_list *new) {
 	t_list *current = g_memory[index];
 
 	if (!current)
@@ -85,7 +85,7 @@ void	append_memory_to_global(enum memory_plage index, t_list *new) {
 	}
 }
 
-void	*get_memory(size_t size, enum memory_plage index) {
+static void	*get_memory(size_t size, enum memory_plage index) {
 	void *addr;
 
 	if (index == LARGE || (addr = free_zone_in(size, index)) == NULL){
@@ -100,46 +100,6 @@ void	*get_memory(size_t size, enum memory_plage index) {
 	return ((char *) addr) + BOOKUNIT * 2;
 }
 
-void	*ft_malloc(size_t size) {
+void	*malloc(size_t size) {
 	return get_memory(size, get_index_memory(size));
 }
-
-#define M (1024 * 1024) // todo delete
-int	main()
-{
-//	size_t size_tiny = TINY_SIZE - 1;
-//	size_t size_small = SMALL_SIZE - 1;
-//	size_t size_large = getpagesize() - 130;
-//
-//	void *tinyblock = ft_malloc(size_tiny);
-//
-//	void *block[100];
-//	for (int i = 0; i < 100; i++){
-//		block[i] = ft_malloc(size_small);
-//	}
-//	void *megablock[4];
-//	for (int i = 0; i < 4; i++){
-//		megablock[i] = ft_malloc(size_large);
-//	}
-//	print_memory();
-//
-//	ft_free(tinyblock);
-//	for (int i = 0; i < 100; i++) {
-//		ft_free(block[i]);
-//	}
-//	ft_free(megablock[2]);
-//	print_memory();
-	char *addr1;
-	char *addr3;
-
-	addr1 = (char *)ft_malloc(16 * M);
-	bzero(addr1, 16 * M);
-	strcpy(addr1, "Bonjours\n");
-	printf("%s", addr1);
-	print_memory();
-	addr3 = (char *) ft_realloc(addr1, 128*M);
-	addr3[127*M] = 42;
-	printf("%s", addr3);
-	print_memory();
-	return 0;
-};
