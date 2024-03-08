@@ -52,7 +52,6 @@ enum vacant {
 enum memory_manage {
 	CREATE,
 	DELETE,
-	REALLOC
 };
 
 /// \brief linked listing all memory pages
@@ -90,5 +89,7 @@ void	print_memory();
 
 /// \brief print all the pages content as requested from the subject
 void	show_alloc_mem();
+
+void manage_memory(enum memory_manage option, size_t size, void **addr);
 
 #endif //MALLOC_MALLOC_H

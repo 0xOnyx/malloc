@@ -78,5 +78,6 @@ void	free(void *ptr) {
 	//remove the page if full free
 	if (BLOCK_LEN((void *) list + HEADER) + BOOKKEEPING == list->size) {
 		removeList(list, index);
+		manage_memory(DELETE, list->size + HEADER, (void **)&list);
 	}
 }

@@ -52,8 +52,7 @@ static void show_all_block( enum memory_plage index, char *str){
 			block += current_size + BOOKKEEPING;
 			nbr++;
 		}
-		if (index!= LARGE)
-			printf("\n\n");
+		printf("\n\n");
 		list = list->next;
 	}
 }

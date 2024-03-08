@@ -21,22 +21,22 @@ static void init_bookkeeping(void *addr, size_t size){
 	*(size_t *)(addr + size - BOOKUNIT) = size - BOOKKEEPING;
 }
 
-static void *manage_memory(enum memory_manage option, size_t size){
+void manage_memory(enum memory_manage option, size_t size, void **addr){
 	static unsigned long long cur_memory;
 
 	if (option == CREATE && can_alloc(cur_memory, size)) {
 		cur_memory += size;
-		return mmap(NULL,
+		*addr = mmap(NULL,
 		size, PROT_READ | PROT_WRITE,
 		MAP_PRIVATE | MAP_ANONYMOUS,
 		-1, 0);
+		return ;
 	}
-	//todo free and realloc implementation
-//	if (option == DELETE){
-//		cur_memory -= free_memory(size);
-//		return NULL;
-//	}
-	return NULL;
+	if (option == DELETE){
+		munmap(*addr, size);
+		cur_memory -= size;
+	}
+	*addr = NULL;
 }
 
 static void set_memory(size_t size, void *addr){
@@ -89,7 +89,8 @@ static void	*get_memory(size_t size, enum memory_plage index) {
 	void *addr;
 
 	if (index == LARGE || (addr = free_zone_in(size, index)) == NULL){
-		t_list *new = manage_memory(CREATE, get_page_size(size));
+		t_list *new;
+		manage_memory (CREATE, get_page_size(size), (void **)&new);
 		new->size = get_page_size(size) - HEADER;
 		new->next = NULL;
 		addr = ((void *)new) + HEADER;
