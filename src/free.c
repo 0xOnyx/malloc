@@ -57,8 +57,6 @@ void	free(void *ptr) {
 		return;
 	list = getList(ptr, &index);
 	if (list == NULL) {
-		dprintf(2, "malloc: *** error for object %p: pointer being freed was not allocated\n", ptr);
-		dprintf(2, "malloc: *** set a breakpoint in malloc_error_break to debug\n");
 		return;
 		//abort();
 	}
