@@ -7,3 +7,6 @@ LD_PRELOAD=./libmalloc.so ./a.out
 
 ## BSD UNIX
 gcc test.c libft_malloc.so && ./a.out
+
+
+https://samwho.dev/memory-allocation/
